@@ -1,5 +1,6 @@
-import { _decorator, CCInteger, Collider2D, Component, ERaycast2DType, Node, PhysicsSystem2D, Rect, RigidBody2D, Vec2, Vec3 } from 'cc';
+import { _decorator, CCInteger, Collider2D, Color, Component, EPhysics2DDrawFlags, ERaycast2DType, math, Node, PhysicsSystem2D, Rect, RigidBody2D, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
+import { DrawLine } from './DrawLine';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -20,6 +21,9 @@ export class Enemy extends Component {
     @property(Node)
     player: Node = null
 
+    @property(DrawLine)
+    drawLine: DrawLine = null
+
     isInDetectionRange: boolean = false
     isRaycastInView: boolean = false
     isChasing: boolean = false
@@ -34,9 +38,19 @@ export class Enemy extends Component {
     start() {
         this.rigidBody = this.getComponent(RigidBody2D)
         this.currentNodeWorldPosition = this.node.worldPosition
+
+        PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
+    EPhysics2DDrawFlags.Pair |
+    EPhysics2DDrawFlags.CenterOfMass |
+    EPhysics2DDrawFlags.Joint |
+    EPhysics2DDrawFlags.Shape;
     }
 
     update(deltaTime: number) {
+
+        this.drawLine.clear()
+
+        this.detectObstaclesInPathByRaycast()
         
         this.detectTargetInView()
 
@@ -46,6 +60,7 @@ export class Enemy extends Component {
 
         if (this.isRaycastInView) {
             this.detectTargetInCircleRange()
+            // có thể check thêm điều kiện nếu player ra khỏi vùng detection thì stopMove
         }
 
         if (this.isInDetectionRange) {
@@ -79,6 +94,13 @@ export class Enemy extends Component {
         let p2 = new Vec2(this.player.worldPosition.x, this.player.worldPosition.y)
 
         let results = PhysicsSystem2D.instance.raycast(p1, p2, ERaycast2DType.All)
+
+        this.drawLine.drawLine(new Vec3(p1.x, p1.y, 0), new Vec3(p2.x, p2.y, 0), Color.BLACK)
+
+        results.forEach(result => {
+            // draw hit point
+            this.drawLine.drawShape(result.point, 10, null, Color.RED)
+        })
         
         if (results.length > 0) {
             const sortedResults = [...results].sort((a, b) => {
@@ -148,6 +170,7 @@ export class Enemy extends Component {
         }
 
         const nextWayPoint = this.waypoints[0].clone()
+        // this.drawLine.drawLine(this.node.worldPosition, nextWayPoint, Color.BLACK)
         const directionToWaypoint = nextWayPoint.subtract(this.node.worldPosition)
         if (directionToWaypoint.length() < 100) {
             this.waypoints.shift()
@@ -166,7 +189,7 @@ export class Enemy extends Component {
         const endPoint = end.clone()
         const startPoint = start.clone()
 
-        const direction = endPoint.subtract(startPoint).normalize()
+        const direction = endPoint.clone().subtract(startPoint).normalize()
 
         const distance = Vec2.distance(new Vec2(startPoint.x, startPoint.y), new Vec2(endPoint.x, endPoint.y))
 
@@ -180,6 +203,72 @@ export class Enemy extends Component {
         path.push(endPoint)
 
         return path
+    }
+
+    /**
+     * @en Change direction when detected obstacles in path
+     */
+    detectObstaclesInPathByRaycast() {
+        const currentNodeWorldPosition = new Vec2(this.node.worldPosition.x, this.node.worldPosition.y)
+        const detectedTargetMiddlePoint = this.movement.clone().normalize().multiplyScalar(200).add(currentNodeWorldPosition)
+        const detectedTargetLeftPoint = this.movement.clone().normalize().multiplyScalar(100).add(currentNodeWorldPosition)
+        const detectedTargetRightPoint = this.movement.clone().normalize().multiplyScalar(100).add(currentNodeWorldPosition)
+
+        const upVector =  this.node.up
+        const downVector = this.node.up.multiplyScalar(-1)
+
+        const distanceSideRaycast = 80
+        const endVectorUp = new Vec3(
+            currentNodeWorldPosition.clone().x + upVector.x * distanceSideRaycast,
+            currentNodeWorldPosition.clone().y + upVector.y * distanceSideRaycast,
+            0
+        )
+        const endVectorDown = new Vec3(
+            currentNodeWorldPosition.clone().x + downVector.x * distanceSideRaycast,
+            currentNodeWorldPosition.clone().y + downVector.y * distanceSideRaycast,
+            0
+        )
+
+        // tính các điểm mục tiêu cho 2 tia 2 bên
+        const offsetValue = 30
+        const leftOffset = new Vec2(-offsetValue, -offsetValue)
+        const rightOffset = new Vec2(offsetValue, offsetValue)
+
+        // điểm bắt đầu và kết thúc của 2 tia 2 bên
+        const leftRayStart = currentNodeWorldPosition.clone().add(leftOffset)
+        const leftRayEnd = detectedTargetLeftPoint.clone().add(leftOffset)
+        const rightRayStart = currentNodeWorldPosition.clone().add(rightOffset)
+        const rightRayEnd = detectedTargetRightPoint.clone().add(rightOffset)
+
+        // Phát hiện vật cản với 5 tia ray
+        const rays = [
+            { start: currentNodeWorldPosition, end: detectedTargetMiddlePoint, pos: 'middle' },
+            { start: leftRayStart, end: leftRayEnd, pos: 'left' },
+            { start: rightRayStart, end: rightRayEnd, pos: 'right' },
+            { start: currentNodeWorldPosition, end: endVectorUp, pos: 'up' },
+            { start: currentNodeWorldPosition, end: endVectorDown, pos: 'down' }
+        ]
+
+        // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
+        // this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
+        // this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
+        // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorUp.x, endVectorUp.y, 0))
+        // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorDown.x, endVectorDown.y, 0))
+
+        for (const ray of rays) {
+            let results = PhysicsSystem2D.instance.raycast(ray.start, ray.end, this.raycastType)
+            if (results.length > 0) {
+                if (results[0]) {
+                    const nodeGroup = results[0].collider.group
+                    if (
+                        nodeGroup === ColliderGroup.Obstacle ||
+                        nodeGroup === ColliderGroup.Enemy
+                    ) {
+                        this.waypoints = []
+                    }
+                }
+            }
+        }
     }
 
     private stopMove() {
