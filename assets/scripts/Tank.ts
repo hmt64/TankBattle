@@ -15,6 +15,20 @@ export class Tank extends Component {
 
     movement: Vec2 = Vec2.ZERO.clone()
     rigidBody: RigidBody2D = null
+<<<<<<< Updated upstream
+=======
+    barrelScript: Barrel = null
+
+    isRaycastInView: boolean = false
+    isInDetectionRange: boolean = false
+
+    _def: number = 3
+    _hp: number = 10
+    _maxHp: number = 10
+    _firingRate: number = 0.8
+
+    progressBar: ProgressBar = null
+>>>>>>> Stashed changes
 
     start() {
         this.rigidBody = this.getComponent(RigidBody2D)
@@ -32,7 +46,13 @@ export class Tank extends Component {
         const normalizedMovement = this.movement.clone().normalize()
         const angle = Math.atan2(normalizedMovement.y, normalizedMovement.x) * 180 / Math.PI - 90
         this.hull.angle = angle
+<<<<<<< Updated upstream
         this.barrel.angle = angle
+=======
+        if (!isAutoAiming) {
+            this.barrel.angle = angle
+        }
+>>>>>>> Stashed changes
     }
 
     onMove(axisRaw: Vec2) {
