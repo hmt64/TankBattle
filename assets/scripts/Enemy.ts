@@ -1,4 +1,4 @@
-import { _decorator, CCInteger, Collider2D, Color, Component, EPhysics2DDrawFlags, ERaycast2DType, math, Node, PhysicsSystem2D, Rect, RigidBody2D, Vec2, Vec3 } from 'cc';
+import { _decorator, CCInteger, Collider2D, Color, Component, EPhysics2DDrawFlags, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
 import { DrawLine } from './DrawLine';
 const { ccclass, property } = _decorator;
@@ -34,16 +34,22 @@ export class Enemy extends Component {
     waypoints: Vec3[] = []
     raycastType: ERaycast2DType = ERaycast2DType.Closest
     currentNodeWorldPosition: Vec3 = Vec3.ZERO.clone()
+    progressbar: ProgressBar = null
+
+    _def: number = 3
+    _hp: number = 10
+    _maxHp: number = 10
 
     start() {
         this.rigidBody = this.getComponent(RigidBody2D)
         this.currentNodeWorldPosition = this.node.worldPosition
+        this.progressbar = this.node.children[2].getComponent(ProgressBar)
 
-        PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
-    EPhysics2DDrawFlags.Pair |
-    EPhysics2DDrawFlags.CenterOfMass |
-    EPhysics2DDrawFlags.Joint |
-    EPhysics2DDrawFlags.Shape;
+    //     PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
+    // EPhysics2DDrawFlags.Pair |
+    // EPhysics2DDrawFlags.CenterOfMass |
+    // EPhysics2DDrawFlags.Joint |
+    // EPhysics2DDrawFlags.Shape;
     }
 
     update(deltaTime: number) {
@@ -89,6 +95,10 @@ export class Enemy extends Component {
         this.hull.angle = angle
     }
 
+    /**
+     * @en Uses raycast to detect Player target, only blocked by obstacles, 
+     * not other enemies
+     */
     private detectTargetInView() {
         let p1 = new Vec2(this.node.worldPosition.x, this.node.worldPosition.y)
         let p2 = new Vec2(this.player.worldPosition.x, this.player.worldPosition.y)
@@ -131,6 +141,9 @@ export class Enemy extends Component {
         }
     }
 
+    /**
+     * @en Detect collider Player in circular area and proceed to chase the target
+     */
     private detectTargetInCircleRange(){
         const rect = new Rect(
             this.node.worldPosition.x - this.detectionRadius,
@@ -139,8 +152,13 @@ export class Enemy extends Component {
             this.detectionRadius * 2
         )
 
+
         const centerPoint = rect.center
         const potentialColliders = PhysicsSystem2D.instance.testAABB(rect)
+
+        this.drawLine.drawShape(centerPoint, this.detectionRadius, null, Color.YELLOW)
+        this.drawLine.drawShape(centerPoint, this.detectionRadius, rect, Color.BLACK)
+
 
         const collidersInCircle: Collider2D[] = []
         for (const collider of potentialColliders) {
@@ -162,6 +180,9 @@ export class Enemy extends Component {
         }
     }
 
+    /**
+     * @en Move to target according to points in waypoints array
+     */
     private moveToPlayer() {
         // tạo đường zic-zac hình tam giác vuông
         const targetPosition = this.player.worldPosition.clone()
@@ -184,6 +205,9 @@ export class Enemy extends Component {
         this.movement = new Vec2(velocity.x, velocity.y)
     }
 
+    /**
+     * @en Create a path in the shape of a right triangle
+     */
     private generateWaypoints(start: Vec3, end: Vec3): Vec3[] {
         const path: Vec3[] = []
         const endPoint = end.clone()
@@ -245,13 +269,13 @@ export class Enemy extends Component {
             { start: currentNodeWorldPosition, end: detectedTargetMiddlePoint, pos: 'middle' },
             { start: leftRayStart, end: leftRayEnd, pos: 'left' },
             { start: rightRayStart, end: rightRayEnd, pos: 'right' },
-            { start: currentNodeWorldPosition, end: endVectorUp, pos: 'up' },
-            { start: currentNodeWorldPosition, end: endVectorDown, pos: 'down' }
+            // { start: currentNodeWorldPosition, end: endVectorUp, pos: 'up' },
+            // { start: currentNodeWorldPosition, end: endVectorDown, pos: 'down' }
         ]
 
-        // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
-        // this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
-        // this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
+        this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
+        this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
+        this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
         // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorUp.x, endVectorUp.y, 0))
         // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorDown.x, endVectorDown.y, 0))
 
@@ -274,6 +298,33 @@ export class Enemy extends Component {
     private stopMove() {
         this.movement = Vec2.ZERO.clone()
         this.isReachedTarget = false
+    }
+
+    beHit(damage: number) {
+        damage -= this._def
+        
+        if (damage <= 0) {
+            damage = 0
+        }
+
+        this._hp -= damage
+        if (this._hp <= 0) {
+            this._hp = 0
+        }
+
+        this.refreshHpBar()
+
+        if (this._hp === 0) {
+            this.doDeath()
+        }
+    }
+
+    private refreshHpBar() {
+        this.progressbar.progress = this._hp / this._maxHp
+    }
+
+    private doDeath() {
+        this.node.destroy()
     }
 }
 

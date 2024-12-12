@@ -76,7 +76,7 @@ export class TankInput extends Component {
     }
 
     onMouseDown(event: EventMouse) {
-        this.tank.aim(new Vec3(event.getLocationX(), event.getLocationY(), 0))
+        this.tank.aim(new Vec3(event.getLocationX(), event.getLocationY(), 0), false)
     }
 
     onMouseUp(event: EventMouse) {
