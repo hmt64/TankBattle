@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, CCInteger, Collider2D, Component, ERaycast2DType, math, Node, PhysicsSystem2D, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Component, ERaycast2DType, math, Node, PhysicsSystem2D, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
 const { ccclass, property } = _decorator;
 
@@ -16,6 +16,9 @@ export class Tank extends Component {
 
     @property(CCFloat)
     detectionRadius: number = 300
+
+    @property(Camera)
+    camera: Camera = null
 
     movement: Vec2 = Vec2.ZERO.clone()
     rigidBody: RigidBody2D = null
@@ -57,6 +60,15 @@ export class Tank extends Component {
 
         if (isAuto) {
             direction = Vec3.subtract(new Vec3(), targetPosition, this.node.worldPosition)
+        } else {
+            const worldPosition = new Vec3()
+            this.camera.screenToWorld(targetPosition, worldPosition)
+            direction = Vec3.subtract(new Vec3(), worldPosition, this.node.worldPosition)
+            
+            // const localMousePosition = new Vec3()
+            // this.node.parent!.inverseTransformPoint(localMousePosition, worldPosition)
+            // localMousePosition.z = 0
+            // direction = Vec3.subtract(new Vec3(), localMousePosition, this.node.getPosition())
         }
 
         const angle = Math.atan2(direction.y, direction.x) * 180 / Math.PI - 90
