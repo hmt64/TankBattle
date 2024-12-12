@@ -1,6 +1,7 @@
-import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Component, ERaycast2DType, math, Node, PhysicsSystem2D, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Component, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
 const { ccclass, property } = _decorator;
+import { Barrel } from './Barrel';
 
 @ccclass('Tank')
 export class Tank extends Component {
@@ -22,12 +23,21 @@ export class Tank extends Component {
 
     movement: Vec2 = Vec2.ZERO.clone()
     rigidBody: RigidBody2D = null
+    barrelScript: Barrel = null
 
     isRaycastInView: boolean = false
     isInDetectionRange: boolean = false
 
+    _def: number = 3
+    _hp: number = 10
+    _maxHp: number = 10
+
+    progressBar: ProgressBar = null
+
     start() {
         this.rigidBody = this.getComponent(RigidBody2D)
+        this.barrelScript = this.barrel.getComponent(Barrel)
+        this.progressBar = this.node.children[2].getComponent(ProgressBar)
     }
 
     update(deltaTime: number) {
@@ -65,6 +75,7 @@ export class Tank extends Component {
             this.camera.screenToWorld(targetPosition, worldPosition)
             direction = Vec3.subtract(new Vec3(), worldPosition, this.node.worldPosition)
             
+            this.barrelScript.fire(direction, 0.5)
             // const localMousePosition = new Vec3()
             // this.node.parent!.inverseTransformPoint(localMousePosition, worldPosition)
             // localMousePosition.z = 0
@@ -132,6 +143,32 @@ export class Tank extends Component {
             this.isRaycastInView = false
             return null
         }
+    }
+
+    beHit(damage: number) {
+        damage -= this._def
+        if (damage <= 0) {
+            damage = 0
+        }
+
+        this._hp -= damage
+        if (this._hp <= 0) {
+            this._hp = 0
+        }
+
+        this.refreshHpBar()
+
+        if (this._hp === 0) {
+            this.doDeath()
+        }
+    }
+
+    private refreshHpBar() {
+        this.progressBar.progress = this._hp / this._maxHp
+    }
+
+    private doDeath() {
+        this.node.destroy()
     }
 }
 
