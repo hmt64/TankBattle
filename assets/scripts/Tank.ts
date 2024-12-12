@@ -1,7 +1,9 @@
-import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Component, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
-const { ccclass, property } = _decorator;
 import { Barrel } from './Barrel';
+import { DrawLine } from './DrawLine';
+const { ccclass, property } = _decorator;
+// import { Barrel } from './Barrel';
 
 @ccclass('Tank')
 export class Tank extends Component {
@@ -21,6 +23,9 @@ export class Tank extends Component {
     @property(Camera)
     camera: Camera = null
 
+    @property(DrawLine)
+    drawLine: DrawLine = null
+
     movement: Vec2 = Vec2.ZERO.clone()
     rigidBody: RigidBody2D = null
     barrelScript: Barrel = null
@@ -31,6 +36,7 @@ export class Tank extends Component {
     _def: number = 3
     _hp: number = 10
     _maxHp: number = 10
+    _firingRate: number = 1.5
 
     progressBar: ProgressBar = null
 
@@ -57,6 +63,8 @@ export class Tank extends Component {
         const angle = Math.atan2(normalizedMovement.y, normalizedMovement.x) * 180 / Math.PI - 90
         this.hull.angle = angle
         if (!isAutoAiming) {
+        console.log('rotateAllPartTankForward not auto aim')
+
             this.barrel.angle = angle
         }
     }
@@ -73,17 +81,17 @@ export class Tank extends Component {
         } else {
             const worldPosition = new Vec3()
             this.camera.screenToWorld(targetPosition, worldPosition)
-            direction = Vec3.subtract(new Vec3(), worldPosition, this.node.worldPosition)
-            
-            this.barrelScript.fire(direction, 0.5)
-            // const localMousePosition = new Vec3()
-            // this.node.parent!.inverseTransformPoint(localMousePosition, worldPosition)
-            // localMousePosition.z = 0
-            // direction = Vec3.subtract(new Vec3(), localMousePosition, this.node.getPosition())
-        }
+            // direction = Vec3.subtract(new Vec3(), targetPosition, this.node.worldPosition)
 
+            const localMousePosition = new Vec3()
+            this.node.parent!.inverseTransformPoint(localMousePosition, worldPosition)
+            localMousePosition.z = 0
+            direction = localMousePosition.clone().subtract(this.node.position.clone())
+            
+        }
         const angle = Math.atan2(direction.y, direction.x) * 180 / Math.PI - 90
         this.barrel.angle = angle
+        this.barrelScript.fire(direction, this._firingRate)
     }
 
     private autoAimInRange() {
@@ -114,10 +122,13 @@ export class Tank extends Component {
             })
 
             for (const point of sortedColliders) {
-                const clostestPoint = this.detectClosetPoint(detectectCenterPoint, new Vec2(point.node.worldPosition.x, point.node.worldPosition.y))
-                if (this.isRaycastInView && clostestPoint != null) {
+                if (point.group === ColliderGroup.Bullet) {
+                    continue
+                }
+                const closestPoint = this.detectClosestPoint(detectectCenterPoint, new Vec2(point.node.worldPosition.x, point.node.worldPosition.y))
+                if (this.isRaycastInView && closestPoint != null) {
                     this.isInDetectionRange = true
-                    this.aim(new Vec3(clostestPoint.x, clostestPoint.y, 0), this.isInDetectionRange)
+                    this.aim(new Vec3(closestPoint.x, closestPoint.y, 0), this.isInDetectionRange)
                     break
                 } else {
                     this.isInDetectionRange = false
@@ -128,7 +139,7 @@ export class Tank extends Component {
         }
     }
 
-    private detectClosetPoint(p1: Vec2, p2: Vec2) {
+    private detectClosestPoint(p1: Vec2, p2: Vec2) {
         let results = PhysicsSystem2D.instance.raycast(p1, p2, ERaycast2DType.Closest)
 
         if (results.length > 0) {

@@ -1,0 +1,256 @@
+[
+  {
+    "__type__": "cc.Prefab",
+    "_name": "Obstacle_Mountain01",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "_native": "",
+    "data": {
+      "__id__": 1
+    },
+    "optimizationPolicy": 0,
+    "persistent": false
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "Obstacle_Mountain01",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "_parent": null,
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 2
+      },
+      {
+        "__id__": 4
+      },
+      {
+        "__id__": 6
+      }
+    ],
+    "_prefab": {
+      "__id__": 8
+    },
+    "_lpos": {
+      "__type__": "cc.Vec3",
+      "x": -274.532,
+      "y": 14.340000000000032,
+      "z": 0
+    },
+    "_lrot": {
+      "__type__": "cc.Quat",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "_lscale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_mobility": 0,
+    "_layer": 33554432,
+    "_euler": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.UITransform",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 3
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 349,
+      "height": 368
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "77HKfo3f9Ik7gn1Pi9bN5y"
+  },
+  {
+    "__type__": "cc.Sprite",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 5
+    },
+    "_customMaterial": null,
+    "_srcBlendFactor": 2,
+    "_dstBlendFactor": 4,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_spriteFrame": {
+      "__uuid__": "5008b41d-e11a-4e4b-83ed-b3e4afb356a0@f9941",
+      "__expectedType__": "cc.SpriteFrame"
+    },
+    "_type": 0,
+    "_fillType": 0,
+    "_sizeMode": 1,
+    "_fillCenter": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_fillStart": 0,
+    "_fillRange": 0,
+    "_isTrimmedMode": true,
+    "_useGrayscale": false,
+    "_atlas": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "7alaSak55AaLxEnwmUman3"
+  },
+  {
+    "__type__": "cc.PolygonCollider2D",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 7
+    },
+    "tag": 0,
+    "_group": 16,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_points": [
+      {
+        "__type__": "cc.Vec2",
+        "x": 170,
+        "y": 82.1
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -174.6,
+        "y": 82.5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -172.7,
+        "y": 34.5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -171.3,
+        "y": 29.8
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -171.2,
+        "y": 17.5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -174.5,
+        "y": -66
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -169.5,
+        "y": -76
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -163.5,
+        "y": -81
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -156.5,
+        "y": -84
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -31.5,
+        "y": -84
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -31.5,
+        "y": -166
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -26.5,
+        "y": -176
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -20.5,
+        "y": -181
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -13.5,
+        "y": -184
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 172,
+        "y": -182.9
+      }
+    ],
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "28zZotORdKCo27ELDo1bU4"
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 1
+    },
+    "asset": {
+      "__id__": 0
+    },
+    "fileId": "8cHrDdRPlEsqZMwslCfLO+",
+    "instance": null,
+    "targetOverrides": null
+  }
+]

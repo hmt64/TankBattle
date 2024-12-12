@@ -45,11 +45,11 @@ export class Enemy extends Component {
         this.currentNodeWorldPosition = this.node.worldPosition
         this.progressbar = this.node.children[2].getComponent(ProgressBar)
 
-        PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
-    EPhysics2DDrawFlags.Pair |
-    EPhysics2DDrawFlags.CenterOfMass |
-    EPhysics2DDrawFlags.Joint |
-    EPhysics2DDrawFlags.Shape;
+    //     PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
+    // EPhysics2DDrawFlags.Pair |
+    // EPhysics2DDrawFlags.CenterOfMass |
+    // EPhysics2DDrawFlags.Joint |
+    // EPhysics2DDrawFlags.Shape;
     }
 
     update(deltaTime: number) {
@@ -152,8 +152,13 @@ export class Enemy extends Component {
             this.detectionRadius * 2
         )
 
+
         const centerPoint = rect.center
         const potentialColliders = PhysicsSystem2D.instance.testAABB(rect)
+
+        this.drawLine.drawShape(centerPoint, this.detectionRadius, null, Color.YELLOW)
+        this.drawLine.drawShape(centerPoint, this.detectionRadius, rect, Color.BLACK)
+
 
         const collidersInCircle: Collider2D[] = []
         for (const collider of potentialColliders) {
@@ -264,13 +269,13 @@ export class Enemy extends Component {
             { start: currentNodeWorldPosition, end: detectedTargetMiddlePoint, pos: 'middle' },
             { start: leftRayStart, end: leftRayEnd, pos: 'left' },
             { start: rightRayStart, end: rightRayEnd, pos: 'right' },
-            { start: currentNodeWorldPosition, end: endVectorUp, pos: 'up' },
-            { start: currentNodeWorldPosition, end: endVectorDown, pos: 'down' }
+            // { start: currentNodeWorldPosition, end: endVectorUp, pos: 'up' },
+            // { start: currentNodeWorldPosition, end: endVectorDown, pos: 'down' }
         ]
 
-        // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
-        // this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
-        // this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
+        this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
+        this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
+        this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
         // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorUp.x, endVectorUp.y, 0))
         // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorDown.x, endVectorDown.y, 0))
 
