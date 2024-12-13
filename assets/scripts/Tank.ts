@@ -37,6 +37,8 @@ export class Tank extends Component {
     _hp: number = 10
     _maxHp: number = 10
     _firingRate: number = 0.8
+    _bulletDamage: number = 4
+    _bulletSpeed: number = 12
 
     progressBar: ProgressBar = null
 
@@ -89,7 +91,7 @@ export class Tank extends Component {
         }
         const angle = Math.atan2(direction.y, direction.x) * 180 / Math.PI - 90
         this.barrel.angle = angle
-        this.barrelScript.fire(direction, this._firingRate)
+        this.barrelScript.fire(direction, this._firingRate, this._bulletDamage, this._bulletSpeed)
     }
 
     private autoAimInRange() {

@@ -1,4 +1,4 @@
-import { _decorator, CCInteger, Component, instantiate, Node, Prefab, Sprite, SpriteFrame } from 'cc';
+import { _decorator, CCInteger, Component, instantiate, Node, Prefab, RigidBody2D, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('BulletPoolManager')
@@ -35,10 +35,20 @@ export class BulletPoolManager extends Component {
     }
 
     returnBullet(bullet: Node): void {
-        bullet.active = false
-        bullet.children[0].getComponent(Sprite).spriteFrame = this.defaultSpriteFrame
-        bullet.setPosition(0, 0)
-        this.pool.push(bullet)
+        bullet.children[0].active = false
+        bullet.children[1].active = true
+
+        bullet.setPosition(Vec3.ZERO.clone())
+        bullet.getComponent(RigidBody2D).linearVelocity = Vec2.ZERO.clone()
+
+        this.scheduleOnce(() => {
+            bullet.active = false
+            
+            bullet.children[0].active = true
+            bullet.children[1].active = false
+
+            this.pool.push(bullet)
+        }, 0.08)
     }
 }
 

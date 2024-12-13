@@ -2174,20 +2174,11 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "bulletPrefab": {
-      "__uuid__": "a26538f1-517d-4ac4-bd87-e8416b208d6f",
-      "__expectedType__": "cc.Prefab"
-    },
-    "bulletSpeed": 20,
     "fireEffect": {
       "__id__": 89
     },
     "bulletPoolManager": {
       "__id__": 95
-    },
-    "boomSpriteFrame": {
-      "__uuid__": "4083348b-26db-44f0-bc3e-00f1a41a11f6@f9941",
-      "__expectedType__": "cc.SpriteFrame"
     },
     "_id": "980C024y1Hr5UFLnTTc0X+"
   },

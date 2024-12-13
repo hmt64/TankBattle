@@ -6,4 +6,13 @@ export const ColliderGroup = {
 }
 export type ColliderGroup = typeof ColliderGroup[keyof typeof ColliderGroup]
 
+export const BulletType = {
+    Normal: 1,
+    TwoRay: 2,
+    FanShape: 3,
+    FourDirection: 4,
+}
+export type BulletType = typeof BulletType[keyof typeof BulletType]
+
+
 
