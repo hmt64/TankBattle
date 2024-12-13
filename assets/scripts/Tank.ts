@@ -1,4 +1,4 @@
-import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, Sprite, SpriteFrame, UITransform, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
 import { Barrel } from './Barrel';
 import { DrawLine } from './DrawLine';
@@ -22,6 +22,9 @@ export class Tank extends Component {
 
     @property(Camera)
     camera: Camera = null
+
+    @property(SpriteFrame)
+    boomTankSpriteFrame: SpriteFrame = null
 
     @property(DrawLine)
     drawLine: DrawLine = null
@@ -214,8 +217,15 @@ export class Tank extends Component {
     }
 
     private doDeath() {
-        // fix me
-        this.node.destroy()
+        if (this.node.isValid) {
+            this.node.children[0].getComponent(Sprite).spriteFrame = this.boomTankSpriteFrame
+            this.node.children[1].active = false
+            this.node.children[2].active = false
+
+            this.scheduleOnce(() => {
+                this.node.destroy()
+            }, 0.2)
+        }
     }
 }
 

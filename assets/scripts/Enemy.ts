@@ -1,6 +1,7 @@
-import { _decorator, CCInteger, Collider2D, Color, Component, EPhysics2DDrawFlags, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, Vec2, Vec3 } from 'cc';
+import { _decorator, CCInteger, Collider2D, Color, Component, EPhysics2DDrawFlags, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
 import { DrawLine } from './DrawLine';
+import { Barrel } from './Barrel';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -21,6 +22,9 @@ export class Enemy extends Component {
     @property(Node)
     player: Node = null
 
+    @property(SpriteFrame)
+    boomTankSpriteFrame: SpriteFrame = null
+
     @property(DrawLine)
     drawLine: DrawLine = null
 
@@ -35,14 +39,19 @@ export class Enemy extends Component {
     raycastType: ERaycast2DType = ERaycast2DType.Closest
     currentNodeWorldPosition: Vec3 = Vec3.ZERO.clone()
     progressbar: ProgressBar = null
+    barrelScript: Barrel = null
 
     _def: number = 3
     _hp: number = 10
     _maxHp: number = 10
+    _firingRate: number = 1.2
+    _bulletDamage: number = 4
+    _bulletSpeed: number = 12
 
     start() {
         this.rigidBody = this.getComponent(RigidBody2D)
         this.currentNodeWorldPosition = this.node.worldPosition
+        this.barrelScript = this.barrel.getComponent(Barrel)
         this.progressbar = this.node.children[2].getComponent(ProgressBar)
 
     //     PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
@@ -53,6 +62,10 @@ export class Enemy extends Component {
     }
 
     update(deltaTime: number) {
+
+        if (!this.player.isValid) {
+            return
+        }
 
         this.drawLine.clear()
 
@@ -87,6 +100,7 @@ export class Enemy extends Component {
         const direction = targetPosition.subtract(this.node.worldPosition)
         const angle = Math.atan2(direction.y, direction.x) * 180 / Math.PI - 90
         this.barrel.angle = angle
+        this.barrelScript.fire(direction, this._firingRate, this._bulletDamage, this._bulletSpeed)
     }
 
     rotateHullForward() {
@@ -324,7 +338,15 @@ export class Enemy extends Component {
     }
 
     private doDeath() {
-        this.node.destroy()
+        if (this.node.isValid) {
+            this.node.children[0].getComponent(Sprite).spriteFrame = this.boomTankSpriteFrame
+            this.node.children[1].active = false
+            this.node.children[2].active = false
+
+            this.scheduleOnce(() => {
+                this.node.destroy()
+            }, 0.2)
+        }
     }
 }
 

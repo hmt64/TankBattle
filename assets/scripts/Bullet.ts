@@ -93,7 +93,7 @@ export class Bullet extends Component {
     private handleHitPlayer(playerNode: Node) {
         const player = playerNode.getComponent(Tank)
         if (player) {
-            // player.beHit(this._damage)
+            player.beHit(this._damage)
         }
         this.returnToPool()
     }
