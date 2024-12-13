@@ -36,7 +36,7 @@ export class Tank extends Component {
     _def: number = 3
     _hp: number = 10
     _maxHp: number = 10
-    _firingRate: number = 1.5
+    _firingRate: number = 0.8
 
     progressBar: ProgressBar = null
 

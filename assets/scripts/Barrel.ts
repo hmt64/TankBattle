@@ -1,5 +1,6 @@
 import { _decorator, CCFloat, Component, instantiate, Node, Prefab, RigidBody2D, Vec2, Vec3 } from 'cc';
 import { Tank } from './Tank';
+import { BulletPoolManager } from './BulletPoolManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Barrel')
@@ -13,6 +14,9 @@ export class Barrel extends Component {
     @property(Node)
     fireEffect: Node = null
 
+    @property(BulletPoolManager)
+    bulletPoolManager: BulletPoolManager = null
+
     canFire: boolean = true
     currentBarrelNode: Node = null
 
@@ -24,7 +28,8 @@ export class Barrel extends Component {
         if (!this.canFire) {
             return
         }
-        const bullet = instantiate(this.bulletPrefab)
+        // const bullet = instantiate(this.bulletPrefab)
+        const bullet = this.bulletPoolManager.getBullet()
 
         bullet.setPosition(this.node.position.clone().add(direction.normalize().clone().multiplyScalar(100)))
         this.currentBarrelNode.parent.addChild(bullet)
@@ -36,12 +41,12 @@ export class Barrel extends Component {
 
         this.canFire = false
         this.scheduleOnce(() => {
-            this.canFire = true
             this.fireEffect.active = false
         }, 0.1)
         this.scheduleOnce(() => {
             this.canFire = true
-            bullet.destroy()
+            // bullet.destroy()
+            this.bulletPoolManager.returnBullet(bullet)
         }, fireCooldown)
     }
 
