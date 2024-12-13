@@ -1,6 +1,7 @@
-import { _decorator, CCFloat, Component, instantiate, Node, Prefab, RigidBody2D, Vec2, Vec3 } from 'cc';
+import { _decorator, CCFloat, Collider2D, Component, Contact2DType, instantiate, IPhysics2DContact, Node, Prefab, RigidBody2D, Sprite, SpriteFrame, Vec2, Vec3 } from 'cc';
 import { Tank } from './Tank';
 import { BulletPoolManager } from './BulletPoolManager';
+import { ColliderGroup } from './Constants/Constants';
 const { ccclass, property } = _decorator;
 
 @ccclass('Barrel')
@@ -16,6 +17,9 @@ export class Barrel extends Component {
 
     @property(BulletPoolManager)
     bulletPoolManager: BulletPoolManager = null
+
+    @property(SpriteFrame)
+    boomSpriteFrame: SpriteFrame = null
 
     canFire: boolean = true
     currentBarrelNode: Node = null
@@ -45,7 +49,6 @@ export class Barrel extends Component {
         }, 0.1)
         this.scheduleOnce(() => {
             this.canFire = true
-            // bullet.destroy()
             this.bulletPoolManager.returnBullet(bullet)
         }, fireCooldown)
     }

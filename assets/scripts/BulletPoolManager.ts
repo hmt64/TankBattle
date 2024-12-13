@@ -1,4 +1,4 @@
-import { _decorator, CCInteger, Component, instantiate, Node, Prefab } from 'cc';
+import { _decorator, CCInteger, Component, instantiate, Node, Prefab, Sprite, SpriteFrame } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('BulletPoolManager')
@@ -10,6 +10,8 @@ export class BulletPoolManager extends Component {
     @property(CCInteger)
     poolSize: number = 10
 
+    defaultSpriteFrame: SpriteFrame = null
+
     private pool: Node[] = []
 
     protected onLoad(): void {
@@ -18,22 +20,23 @@ export class BulletPoolManager extends Component {
             bullet.active = false
             this.pool.push(bullet)
         }
+        this.defaultSpriteFrame = this.bulletPrefab.data.children[0].getComponent(Sprite).spriteFrame
     }
 
     getBullet(): Node {
+        let bullet: Node = null
         if (this.pool.length > 0) {
-            const bullet = this.pool.pop()
-            bullet.active = true
-            return bullet
+            bullet = this.pool.pop()
         } else {
-            const bullet = instantiate(this.bulletPrefab)
-            bullet.active = true
-            return bullet
+            bullet = instantiate(this.bulletPrefab)
         }
+        bullet.active = true
+        return bullet
     }
 
     returnBullet(bullet: Node): void {
         bullet.active = false
+        bullet.children[0].getComponent(Sprite).spriteFrame = this.defaultSpriteFrame
         bullet.setPosition(0, 0)
         this.pool.push(bullet)
     }
