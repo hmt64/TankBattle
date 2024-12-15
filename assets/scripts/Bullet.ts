@@ -34,10 +34,6 @@ export class Bullet extends Component {
         this._destroyTime = this._gunshot / this._speed
         this.bulletPoolManager = poolManager
 
-        // this._isStop = false
-
-        console.log('destroyTime', this._destroyTime)
-
         this._registerCollisionEvent();
     }
 

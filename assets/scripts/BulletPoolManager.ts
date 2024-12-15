@@ -27,6 +27,8 @@ export class BulletPoolManager extends Component {
         let bullet: Node = null
         if (this.pool.length > 0) {
             bullet = this.pool.pop()
+            bullet.children[0].active = true
+            bullet.children[1].active = false
         } else {
             bullet = instantiate(this.bulletPrefab)
         }
@@ -35,6 +37,7 @@ export class BulletPoolManager extends Component {
     }
 
     returnBullet(bullet: Node): void {
+        console.log('pool size', this.pool.length)
         bullet.children[0].active = false
         bullet.children[1].active = true
 
@@ -43,9 +46,6 @@ export class BulletPoolManager extends Component {
 
         this.scheduleOnce(() => {
             bullet.active = false
-            
-            bullet.children[0].active = true
-            bullet.children[1].active = false
 
             this.pool.push(bullet)
         }, 0.08)

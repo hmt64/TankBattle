@@ -2,6 +2,7 @@ import { _decorator, CCInteger, Collider2D, Color, Component, EPhysics2DDrawFlag
 import { ColliderGroup } from './Constants/Constants';
 import { DrawLine } from './DrawLine';
 import { Barrel } from './Barrel';
+import { EventCenter } from './EventCenter';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -45,8 +46,9 @@ export class Enemy extends Component {
     _hp: number = 10
     _maxHp: number = 10
     _firingRate: number = 1.2
-    _bulletDamage: number = 4
+    _bulletDamage: number = 3
     _bulletSpeed: number = 12
+    _coinCount: number = 3
 
     start() {
         this.rigidBody = this.getComponent(RigidBody2D)
@@ -67,7 +69,7 @@ export class Enemy extends Component {
             return
         }
 
-        this.drawLine.clear()
+        // this.drawLine.clear()
 
         this.detectObstaclesInPathByRaycast()
         
@@ -119,11 +121,11 @@ export class Enemy extends Component {
 
         let results = PhysicsSystem2D.instance.raycast(p1, p2, ERaycast2DType.All)
 
-        this.drawLine.drawLine(new Vec3(p1.x, p1.y, 0), new Vec3(p2.x, p2.y, 0), Color.BLACK)
+        // this.drawLine.drawLine(new Vec3(p1.x, p1.y, 0), new Vec3(p2.x, p2.y, 0), Color.BLACK)
 
         results.forEach(result => {
             // draw hit point
-            this.drawLine.drawShape(result.point, 10, null, Color.RED)
+            // this.drawLine.drawShape(result.point, 10, null, Color.RED)
         })
         
         if (results.length > 0) {
@@ -170,8 +172,8 @@ export class Enemy extends Component {
         const centerPoint = rect.center
         const potentialColliders = PhysicsSystem2D.instance.testAABB(rect)
 
-        this.drawLine.drawShape(centerPoint, this.detectionRadius, null, Color.YELLOW)
-        this.drawLine.drawShape(centerPoint, this.detectionRadius, rect, Color.BLACK)
+        // this.drawLine.drawShape(centerPoint, this.detectionRadius, null, Color.YELLOW)
+        // this.drawLine.drawShape(centerPoint, this.detectionRadius, rect, Color.BLACK)
 
 
         const collidersInCircle: Collider2D[] = []
@@ -287,9 +289,9 @@ export class Enemy extends Component {
             // { start: currentNodeWorldPosition, end: endVectorDown, pos: 'down' }
         ]
 
-        this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
-        this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
-        this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
+        // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(detectedTargetMiddlePoint.x, detectedTargetMiddlePoint.y, 0))
+        // this.drawLine.drawLine(new Vec3(leftRayStart.x, leftRayStart.y, 0), new Vec3(leftRayEnd.x, leftRayEnd.y, 0))
+        // this.drawLine.drawLine(new Vec3(rightRayStart.x, rightRayStart.y, 0), new Vec3(rightRayEnd.x, rightRayEnd.y, 0))
         // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorUp.x, endVectorUp.y, 0))
         // this.drawLine.drawLine(new Vec3(currentNodeWorldPosition.x, currentNodeWorldPosition.y, 0), new Vec3(endVectorDown.x, endVectorDown.y, 0))
 
@@ -344,6 +346,10 @@ export class Enemy extends Component {
             this.node.children[2].active = false
 
             this.scheduleOnce(() => {
+                EventCenter.instance.emit('add-coin', {
+                    count: this._coinCount,
+                    position: this.node.worldPosition
+                })
                 this.node.destroy()
             }, 0.2)
         }
