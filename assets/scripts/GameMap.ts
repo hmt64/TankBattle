@@ -1,4 +1,5 @@
 import { _decorator, Camera, Component, math, Node, UITransform } from 'cc';
+import { Config } from './Config';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameMap')
@@ -10,13 +11,16 @@ export class GameMap extends Component {
     @property(Node)
     target: Node = null
 
+    @property(Node)
+    topUI: Node = null
+
     mapSize: { width: number, height: number } = { width: 0, height: 0 }
 
     gameFrameSize: { width: number, height: number } = { width: 0, height: 0 }
 
     start() {
         this.mapSize = this.node.getComponent(UITransform).getBoundingBox()
-        this.gameFrameSize = { width: this.mapSize.width / 2, height: 1136 }
+        this.gameFrameSize = Config.instance.gameFrameSize
     }
 
     protected lateUpdate(dt: number): void {
@@ -33,6 +37,7 @@ export class GameMap extends Component {
         const clampedY = math.clamp(this.target.position.y, minY, maxY)
 
         this.camera.node.setPosition(clampedX, clampedY, this.camera.node.position.z)
+        this.topUI.setPosition(clampedX, clampedY, this.topUI.position.z)
     }
 }
 

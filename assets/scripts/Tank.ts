@@ -2,6 +2,7 @@ import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, E
 import { ColliderGroup } from './Constants/Constants';
 import { Barrel } from './Barrel';
 import { DrawLine } from './DrawLine';
+import { EventCenter } from './EventCenter';
 const { ccclass, property } = _decorator;
 // import { Barrel } from './Barrel';
 
