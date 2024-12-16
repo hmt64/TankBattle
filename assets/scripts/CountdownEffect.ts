@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, Component, EffectAsset, Material, Node, ProgressBar, Sprite, Tween } from 'cc';
+import { _decorator, Button, CCFloat, Component, EffectAsset, Material, Node, ProgressBar, Sprite, Tween } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('CountdownEffect')
@@ -40,13 +40,12 @@ export class CountdownEffect extends Component {
         new Tween(this.progressBar)
         .to(this.countdownTime, { progress: 0 }, {easing: 'linear'})
         .call(() => {
-            this.loadEffect(this.node.children[0])
+            this.loadEffect(this.node.parent.children[0])
         })
         .start()
     }
 
     loadEffect(target: Node) {
-        console.log('loadEffect')
         let mat = new Material()
         mat.initialize({
             effectAsset: this.effectAsset,
@@ -61,6 +60,8 @@ export class CountdownEffect extends Component {
         mat.setProperty('_radian', 0.7)
 
         target.getComponent(Sprite).customMaterial = mat
+        let button = target.addComponent(Button)
+        button.transition = Button.Transition.SCALE
     }
 }
 
