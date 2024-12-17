@@ -15,4 +15,10 @@ export const BulletType = {
 export type BulletType = typeof BulletType[keyof typeof BulletType]
 
 
-
+export const SkillType = {
+    MultiRay: 0,
+    RestoreHealth: 1,
+    Freeze: 2,
+    Shield: 3,
+}
+export type SkillType = typeof SkillType[keyof typeof SkillType]
