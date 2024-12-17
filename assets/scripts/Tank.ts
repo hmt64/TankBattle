@@ -44,8 +44,6 @@ export class Tank extends Component {
     _bulletDamage: number = 4
     _bulletSpeed: number = 12
 
-    _viewMode: boolean = true
-
     progressBar: ProgressBar = null
 
     start() {
@@ -55,10 +53,6 @@ export class Tank extends Component {
     }
 
     update(deltaTime: number) {
-        if (this._viewMode) {
-            this.rotateTankViewMode(deltaTime)
-            return
-        }
         this.autoAimInRange()
         this.rotateAllPartTankForward(this.isInDetectionRange)
     }
@@ -77,10 +71,6 @@ export class Tank extends Component {
         if (!isAutoAiming) {
             this.barrel.angle = angle
         }
-    }
-
-    private rotateTankViewMode(deltaTime: number) {
-        this.node.angle += 2.5
     }
 
     onMove(axisRaw: Vec2) {
