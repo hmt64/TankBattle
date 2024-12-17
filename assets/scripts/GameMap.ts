@@ -14,6 +14,9 @@ export class GameMap extends Component {
     @property(Node)
     topUI: Node = null
 
+    @property(Node)
+    leftUI: Node = null
+
     mapSize: { width: number, height: number } = { width: 0, height: 0 }
 
     gameFrameSize: { width: number, height: number } = { width: 0, height: 0 }
@@ -38,6 +41,7 @@ export class GameMap extends Component {
 
         this.camera.node.setPosition(clampedX, clampedY, this.camera.node.position.z)
         this.topUI.setPosition(clampedX, clampedY, this.topUI.position.z)
+        this.leftUI.setPosition(clampedX, clampedY, this.leftUI.position.z)
     }
 }
 
