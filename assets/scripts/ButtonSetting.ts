@@ -13,6 +13,7 @@ export class ButtonSetting extends Component {
 
     onClickSetting() {
         director.pause()
+        this.node.parent.parent.getChildByName('_lyRestart').active = true
     }
 }
 
