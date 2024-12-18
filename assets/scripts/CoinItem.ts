@@ -1,4 +1,4 @@
-import { _decorator, Camera, CCFloat, Color, Component, Label, Node, Sprite, tween, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, bezier, Camera, CCFloat, Color, Component, Label, Node, Sprite, tween, UITransform, Vec2, Vec3 } from 'cc';
 import { EventCenter } from './EventCenter';
 const { ccclass, property } = _decorator;
 
@@ -39,33 +39,16 @@ export class CoinItem extends Component {
     }
 
     private _onAddCoin(event: { count: number, position: Vec3 }) {
-        this._createCoin(event.count, event.position, this.timeDestroyCoin)
-    }
-    
-    private _onReduceCoin(event: { count: number }) {
-        this._handleCoinChange(-event.count);
-    }
-
-    private _handleCoinChange(count: number, position?: Vec3) {
-        if (count <= 0 || !position) {
-            this._realCount += count;
-            this._refreshLabel();
-        } else {
-            for (let i = 0; i < 4; i++) {
-                this._createCoin(Math.floor(count / 4), position, 1 + i * 0.1)
-            }
+        for (let i = 0; i < event.count; i++) {
+            this._createCoin(event.count, event.position, this.timeDestroyCoin, i * 0.1)
         }
-    }
-
-    start() {
-
     }
 
     update(deltaTime: number) {
         this._refreshLabel()
     }
 
-    private _createCoin(count: number, position: Vec3, time: number) {
+    private _createCoin(count: number, position: Vec3, time: number, delay: number) {
         const coin = new Node()
         const localPosition = this._sprCoin.parent!.getComponent(UITransform)?.convertToNodeSpaceAR(position)
         coin.position = localPosition
@@ -76,8 +59,35 @@ export class CoinItem extends Component {
 
         const targetPosition = this._sprCoin.position;
 
+        // Tạo điểm điều khiển ngẫu nhiên
+        const controlPoint = localPosition.clone().add(new Vec3(
+            (Math.random() - 0.5) * 300, // X lệch ngẫu nhiên
+            Math.random() * 300 + 100,  // Y lệch ngẫu nhiên
+            0                           // Z không cần
+        ));
+
+        // Chuyển các điểm thành tọa độ riêng biệt
+        const startX = localPosition.x, startY = localPosition.y;
+        const controlX = controlPoint.x, controlY = controlPoint.y;
+        const endX = targetPosition.x, endY = targetPosition.y;
+
+        let elapsed = 0;
+
         tween(coin)
-            .to(1, { position: targetPosition })
+            .delay(delay)
+            .to(time, {}, {
+                onUpdate: (target: Node, ratio: number) => {
+                    elapsed += 1 / 60; // Giả sử 60 FPS
+                const t = Math.min(elapsed / time, 1); // Tính giá trị t (0 -> 1)
+
+                // Tính toán tọa độ mới bằng công thức Bezier
+                const x = bezier(startX, controlX, controlX, endX, t);
+                const y = bezier(startY, controlY, controlY, endY, t);
+
+                // Cập nhật vị trí node
+                target.setPosition(x, y, 0);
+                }
+            })
             .call(() => {
                 this._viewCount += count
                 this._refreshLabel()
@@ -86,9 +96,23 @@ export class CoinItem extends Component {
             .start()
     }
 
-
     private _refreshLabel() {
         this._lbCoin.string = this._viewCount.toString()
+    }
+
+    private _onReduceCoin(event: { count: number }) {
+        this._handleCoinChange(-event.count);
+    }
+
+    private _handleCoinChange(count: number, position?: Vec3) {
+        // if (count <= 0 || !position) {
+        //     this._realCount += count;
+        //     this._refreshLabel();
+        // } else {
+        //     for (let i = 0; i < 4; i++) {
+        //         this._createCoin(Math.floor(count / 4), position, 1 + i * 0.1)
+        //     }
+        // }
     }
 }
 

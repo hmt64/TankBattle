@@ -3,6 +3,7 @@ import { ColliderGroup } from './Constants/Constants';
 import { DrawLine } from './DrawLine';
 import { Barrel } from './Barrel';
 import { EventCenter } from './EventCenter';
+import { BulletPoolManager } from './BulletPoolManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -61,6 +62,7 @@ export class Enemy extends Component {
     // EPhysics2DDrawFlags.CenterOfMass |
     // EPhysics2DDrawFlags.Joint |
     // EPhysics2DDrawFlags.Shape;
+
     }
 
     update(deltaTime: number) {
@@ -341,18 +343,29 @@ export class Enemy extends Component {
 
     private doDeath() {
         if (this.node.isValid) {
-            this.node.children[0].getComponent(Sprite).spriteFrame = this.boomTankSpriteFrame
-            this.node.children[1].active = false
-            this.node.children[2].active = false
-
-            this.scheduleOnce(() => {
-                EventCenter.instance.emit('add-coin', {
-                    count: this._coinCount,
-                    position: this.node.worldPosition
-                })
-                this.node.destroy()
-            }, 0.2)
+            EventCenter.instance.emit('destroy-enemy', {
+                enemyTank: this.node,
+                position: this.node.worldPosition
+            })
+            EventCenter.instance.emit('add-coin', {
+                count: this._coinCount,
+                position: this.node.worldPosition
+            })
         }
+    }
+
+    setTarget(target: Node) {
+        if (this.player == null) {
+            this.player = target
+        }
+    }
+
+    setDrawLine(drawLine: DrawLine) {
+        this.drawLine = drawLine
+    }
+
+    setBulletPoolManager(bulletPoolManager: BulletPoolManager) {  
+        this.barrel.getComponent(Barrel).setBulletPoolManager(bulletPoolManager)
     }
 }
 

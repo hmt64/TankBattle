@@ -11,6 +11,7 @@ export class Config {
     public safeTopBottom: number = 0;
     public config: any = null;
     public bundle: any = null;
+    public level = {"0":{"LevelId":0,"EnemyCount":5,"CoinCount":100,"Max":5}}
 
     private constructor() {}
 

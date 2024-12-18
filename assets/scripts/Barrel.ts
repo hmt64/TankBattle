@@ -39,5 +39,9 @@ export class Barrel extends Component {
             this.canFire = true
         }, fireCooldown)
     }
+
+    setBulletPoolManager(bulletPoolManager: BulletPoolManager) {
+        this.bulletPoolManager = bulletPoolManager
+    }
 }
 
