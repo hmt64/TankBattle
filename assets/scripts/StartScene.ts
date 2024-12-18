@@ -6,6 +6,9 @@ export class StartScene extends Component {
 
     protected onLoad(): void {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this)
+        if (director.isPaused()) {
+            director.resume()
+        }
     }
 
     start() {
@@ -18,6 +21,7 @@ export class StartScene extends Component {
 
     onTouchStart(event: EventTouch) {
         director.loadScene('Game')
+        director.resume()
     }
 }
 
