@@ -37,7 +37,6 @@ export class BulletPoolManager extends Component {
     }
 
     returnBullet(bullet: Node): void {
-        console.log('pool size', this.pool.length)
         bullet.children[0].active = false
         bullet.children[1].active = true
 
