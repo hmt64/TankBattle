@@ -2,12 +2,13 @@ import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, E
 import { ColliderGroup } from './Constants/Constants';
 import { Barrel } from './Barrel';
 import { DrawLine } from './DrawLine';
-import { EventCenter } from './EventCenter';
+import { ITarget } from './Interfaces/ITarget';
+import { Enemy } from './Enemy';
 const { ccclass, property } = _decorator;
 // import { Barrel } from './Barrel';
 
 @ccclass('Tank')
-export class Tank extends Component {
+export class Tank extends Component implements ITarget {
 
     @property(CCInteger)
     speed: number = 20
@@ -36,6 +37,7 @@ export class Tank extends Component {
 
     isRaycastInView: boolean = false
     isInDetectionRange: boolean = false
+    obstacleDetected: boolean = false
 
     _def: number = 3
     _hp: number = 10
@@ -95,7 +97,9 @@ export class Tank extends Component {
         }
         const angle = Math.atan2(direction.y, direction.x) * 180 / Math.PI - 90
         this.barrel.angle = angle
-        this.barrelScript.fire(direction, this._firingRate, this._bulletDamage, this._bulletSpeed)
+        if (!this.obstacleDetected) {
+            this.barrelScript.fire(direction, this._firingRate, this._bulletDamage, this._bulletSpeed)
+        }
     }
 
     private autoAimInRange() {
@@ -111,9 +115,10 @@ export class Tank extends Component {
 
         const collidersInCircle: Collider2D[] = []
         for (const collider of potentialColliders) {
+            const target = collider.node.getComponent(Enemy)
             const colliderPosition = collider.node.worldPosition
             const distance = Vec2.distance(detectectCenterPoint, new Vec2(colliderPosition.x, colliderPosition.y))
-            if (distance < this.detectionRadius && collider.group === ColliderGroup.Enemy) {
+            if (distance < this.detectionRadius && target && target.isDetectable()) {
                 collidersInCircle.push(collider)
             }
         }
@@ -131,17 +136,6 @@ export class Tank extends Component {
             if (this.isRaycastInView) {
                 this.aim(new Vec3(closestPoint.x, closestPoint.y, 0), this.isInDetectionRange)
             }
-
-            // for (const point of sortedColliders) {
-            //     const closestPoint = this.detectClosestPoint(detectectCenterPoint, new Vec2(point.node.worldPosition.x, point.node.worldPosition.y))
-            //     if (this.isRaycastInView && closestPoint != null) {
-            //         this.isInDetectionRange = true
-            //         this.aim(new Vec3(closestPoint.x, closestPoint.y, 0), this.isInDetectionRange)
-            //         break
-            //     } else {
-            //         this.isInDetectionRange = false
-            //     }
-            // }
         } else {
             this.isInDetectionRange = false
         }
@@ -157,21 +151,13 @@ export class Tank extends Component {
                 return distanceA - distanceB
             })
 
-            let obstacleDetected = false
-            for (const result of sortedResults) {
-                const nodeGroup = result.collider.group
-
-                if (nodeGroup === ColliderGroup.Obstacle) {
-                    obstacleDetected = true
-                    this.isRaycastInView = false
-                    this.isInDetectionRange = false
-                    return
-                } else if (nodeGroup === ColliderGroup.Enemy) {
-                    if (!obstacleDetected) {
-                        this.isRaycastInView = true
-                        return
-                    }
-                }
+            const target = sortedResults[0].collider.node.getComponent(Enemy)
+            if (target && target.isDetectable()) {
+                this.isRaycastInView = true
+                this.obstacleDetected = false
+            } else {
+                this.isRaycastInView = false
+                this.obstacleDetected = true
             }
         } else {
             this.isRaycastInView = false
@@ -227,6 +213,10 @@ export class Tank extends Component {
                 this.node.destroy()
             }, 0.2)
         }
+    }
+
+    isDetectable(): boolean {
+        return true
     }
 }
 
