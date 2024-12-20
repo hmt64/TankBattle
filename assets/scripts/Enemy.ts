@@ -4,10 +4,12 @@ import { DrawLine } from './DrawLine';
 import { Barrel } from './Barrel';
 import { EventCenter } from './EventCenter';
 import { BulletPoolManager } from './BulletPoolManager';
+import { Tank } from './Tank';
+import { ITarget } from './Interfaces/ITarget';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
-export class Enemy extends Component {
+export class Enemy extends Component implements ITarget {
 
     @property(CCInteger)
     speed: number = 4
@@ -56,13 +58,6 @@ export class Enemy extends Component {
         this.currentNodeWorldPosition = this.node.worldPosition
         this.barrelScript = this.barrel.getComponent(Barrel)
         this.progressbar = this.node.children[2].getComponent(ProgressBar)
-
-    //     PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.Aabb |
-    // EPhysics2DDrawFlags.Pair |
-    // EPhysics2DDrawFlags.CenterOfMass |
-    // EPhysics2DDrawFlags.Joint |
-    // EPhysics2DDrawFlags.Shape;
-
     }
 
     update(deltaTime: number) {
@@ -125,10 +120,10 @@ export class Enemy extends Component {
 
         // this.drawLine.drawLine(new Vec3(p1.x, p1.y, 0), new Vec3(p2.x, p2.y, 0), Color.BLACK)
 
-        results.forEach(result => {
-            // draw hit point
-            // this.drawLine.drawShape(result.point, 10, null, Color.RED)
-        })
+        // results.forEach(result => {
+        //     // draw hit point
+        //     this.drawLine.drawShape(result.point, 10, null, Color.RED)
+        // })
         
         if (results.length > 0) {
             const sortedResults = [...results].sort((a, b) => {
@@ -137,21 +132,14 @@ export class Enemy extends Component {
                 return distanceA - distanceB
             })
 
-            let obstacleDetected = false
             for (const result of sortedResults) {
-                const nodeGroup = result.collider.group
+                const target = result.collider.node.getComponent(Tank)
                 const point = result.point
 
-                if (nodeGroup === ColliderGroup.Obstacle) {
-                    obstacleDetected = true
-                    this.isRaycastInView = false
+                if (target && target.isDetectable()) {
+                    p2 = point
+                    this.isRaycastInView = true
                     return
-                } else if (nodeGroup === ColliderGroup.Player) {
-                    if (!obstacleDetected) {
-                        p2 = point
-                        this.isRaycastInView = true
-                        return
-                    }
                 }
             }
         } else {
@@ -180,10 +168,10 @@ export class Enemy extends Component {
 
         const collidersInCircle: Collider2D[] = []
         for (const collider of potentialColliders) {
-            const nodeGroup = collider.group
+            const target = collider.node.getComponent(Tank)
             const colliderPosition = collider.node.worldPosition
             const distance = Vec2.distance(centerPoint, new Vec2(colliderPosition.x, colliderPosition.y))
-            if (distance < this.detectionRadius && nodeGroup === ColliderGroup.Player) {
+            if (distance < this.detectionRadius && target && target.isDetectable()) {
                 collidersInCircle.push(collider)
             }
         }
@@ -366,6 +354,10 @@ export class Enemy extends Component {
 
     setBulletPoolManager(bulletPoolManager: BulletPoolManager) {  
         this.barrel.getComponent(Barrel).setBulletPoolManager(bulletPoolManager)
+    }
+
+    isDetectable(): boolean {
+        return true
     }
 }
 
