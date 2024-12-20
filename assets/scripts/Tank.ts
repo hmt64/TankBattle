@@ -1,9 +1,13 @@
-import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, ERaycast2DType, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, Sprite, SpriteFrame, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCFloat, CCInteger, Collider2D, Color, Component, ERaycast2DType, KeyCode, math, Node, PhysicsSystem2D, ProgressBar, Rect, RigidBody2D, Sprite, SpriteFrame, UITransform, Vec2, Vec3 } from 'cc';
 import { ColliderGroup } from './Constants/Constants';
 import { Barrel } from './Barrel';
 import { DrawLine } from './DrawLine';
 import { ITarget } from './Interfaces/ITarget';
 import { Enemy } from './Enemy';
+import { IInput } from './Interfaces/IInput';
+import { KeyboardInput } from './KeyboardInput';
+import { MultiInput } from './MultiInput';
+import { VirtualJoystic } from './VirtualJoystick';
 const { ccclass, property } = _decorator;
 // import { Barrel } from './Barrel';
 
@@ -28,12 +32,16 @@ export class Tank extends Component implements ITarget {
     @property(SpriteFrame)
     boomTankSpriteFrame: SpriteFrame = null
 
+    @property(VirtualJoystic)
+    virtualJoystick: VirtualJoystic = null
+
     @property(DrawLine)
     drawLine: DrawLine = null
 
     movement: Vec2 = Vec2.ZERO.clone()
     rigidBody: RigidBody2D = null
     barrelScript: Barrel = null
+    input: IInput = null
 
     isRaycastInView: boolean = false
     isInDetectionRange: boolean = false
@@ -52,9 +60,14 @@ export class Tank extends Component implements ITarget {
         this.rigidBody = this.getComponent(RigidBody2D)
         this.barrelScript = this.barrel.getComponent(Barrel)
         this.progressBar = this.node.children[2].getComponent(ProgressBar)
+        this.virtualJoystick.init()
+        const arrowKeys = new KeyboardInput(KeyCode.ARROW_UP, KeyCode.ARROW_DOWN, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT)
+        const wasdKeys = new KeyboardInput(KeyCode.KEY_W, KeyCode.KEY_S, KeyCode.KEY_A, KeyCode.KEY_D)
+        this.input = new MultiInput([this.virtualJoystick, arrowKeys, wasdKeys])
     }
 
     update(deltaTime: number) {
+        this.movement = this.input.getAxis().multiplyScalar(this.speed)
         this.autoAimInRange()
         this.rotateAllPartTankForward(this.isInDetectionRange)
     }
@@ -73,10 +86,6 @@ export class Tank extends Component implements ITarget {
         if (!isAutoAiming) {
             this.barrel.angle = angle
         }
-    }
-
-    onMove(axisRaw: Vec2) {
-        this.movement = axisRaw.multiplyScalar(this.speed)
     }
 
     public aim(targetPosition: Vec3, isAuto: boolean = false) {
